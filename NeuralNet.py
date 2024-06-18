@@ -1,10 +1,19 @@
 import numpy as np
-from dinoAIParallel import KeyClassifier, parse_object_type
 
 INPUT_LAYER_SIZE = 7
 THRESHOLD = 0.55
 
-class NeuralNet(KeyClassifier):
+def parse_object_type(object_type):
+    object_types = {
+        'SmallCactus': 0,
+        'LargeCactus': 1,
+        'Bird': 2
+    }
+
+    object_type_name = type(object_type).__name__
+    return object_types.get(object_type_name, -1)
+
+class NeuralNet:
     def __init__(self, state, hidden_layer_size=4):
         self.hidden_layer_size = hidden_layer_size
         fc1, fc2 = self._parse_state(state)

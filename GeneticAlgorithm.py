@@ -32,7 +32,7 @@ class GeneticAlgorithm:
             elapsed_time = curr_time - start_time
             if elapsed_time > timelimit: break
         
-        return best_individual[0]
+        return best_individual
 
     def _initialize_population(self):
         return [self.random.randn(self.chromosome_length) for _ in range(self.population_size)]
@@ -40,7 +40,12 @@ class GeneticAlgorithm:
     def _parent_selection(self, population, fitness_values):
         total_fitness = sum(fitness_values)
         selection_probs = fitness_values / total_fitness
-        return self.random.choices(population, weights=selection_probs, k=2)
+
+        indices = np.arange(self.population_size)
+        parent_indices = self.random.choice(indices, size=2, p=selection_probs)
+        parent1, parent2 = population[parent_indices[0]], population[parent_indices[1]]
+
+        return parent1, parent2
 
     def _crossover(self, parent1, parent2):
         mask = np.random.rand(self.chromosome_length) < 0.5

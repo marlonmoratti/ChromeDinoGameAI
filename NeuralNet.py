@@ -1,4 +1,5 @@
 import numpy as np
+from scipy.special import expit
 
 INPUT_LAYER_SIZE = 7
 THRESHOLD = 0.55
@@ -44,4 +45,4 @@ class NeuralNet:
         return np.maximum(x, 0)
 
     def _sigmoid(self, x):
-        return 1 / (1 + np.exp(-x))
+        return expit(x)

@@ -7,19 +7,23 @@ class GeneticAlgorithm:
     def __init__(self, fitness_fn,
                  chromosome_length,
                  population_size=100,
+                 selection_type='tournament',
+                 tournament_percent=0.05,
                  crossover_rate=0.9,
                  mutation_rate=0.1,
                  mutation_strength=1,
-                 elitism_rate=0.2,
+                 elitism_percent=0.2,
                  random_state=None):
 
         self._fitness = fitness_fn
         self.chromosome_length = chromosome_length
         self.population_size = population_size
+        self.selection_type = selection_type
+        self.tournament_size = int(np.ceil(tournament_percent * population_size))
         self.crossover_rate = crossover_rate
         self.mutation_rate = mutation_rate
         self.mutation_strength = mutation_strength
-        self.elitism_size = int(np.ceil(elitism_rate * population_size))
+        self.elitism_size = int(np.ceil(elitism_percent * population_size))
         self.random = np.random.RandomState(random_state)
 
     def evolve(self, generations, timelimit):
@@ -54,12 +58,36 @@ class GeneticAlgorithm:
         return population[indices], fitness_values[indices]
 
     def _parent_selection(self, population, fitness_values):
+        selection = {
+            'roulette': self._roulette_wheel_selection,
+            'tournament': self._tournament_selection
+        }
+
+        return selection[self.selection_type](population, fitness_values)
+    
+    def _roulette_wheel_selection(self, population, fitness_values):
         total_fitness = sum(fitness_values)
         selection_probs = fitness_values / total_fitness
 
-        parent_indices = self.random.choice(self.population_size, size=2, p=selection_probs)
+        parent_indices = self.random.choice(self.population_size, size=2, replace=False, p=selection_probs)
         parent1, parent2 = population[parent_indices[0]], population[parent_indices[1]]
 
+        return parent1, parent2
+    
+    def _tournament_selection(self, population, fitness_values):
+        get_tournament_indices = lambda: self.random.choice(self.population_size, size=self.tournament_size, replace=False)
+
+        tournament_indices = get_tournament_indices()
+        parent1_idx = min(tournament_indices)
+
+        tournament_indices = get_tournament_indices()
+        parent2_idx = min(tournament_indices)
+
+        while parent1_idx == parent2_idx:
+            tournament_indices = get_tournament_indices()
+            parent2_idx = min(tournament_indices)
+
+        parent1, parent2 = population[parent1_idx], population[parent2_idx]
         return parent1, parent2
 
     def _crossover(self, parent1, parent2):

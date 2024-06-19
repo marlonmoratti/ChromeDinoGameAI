@@ -397,7 +397,7 @@ def main():
         chromosome_length=37,
         crossover_rate=0.9,
         mutation_rate=0.1,
-        elitism_rate=0.2,
+        elitism_percent=0.2,
         random_state=42
     )
 

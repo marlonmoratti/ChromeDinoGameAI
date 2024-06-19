@@ -393,14 +393,15 @@ from GeneticAlgorithm import GeneticAlgorithm
 def main():
 
     ga = GeneticAlgorithm(
-        fitness_fn=lambda x: np.maximum(manyPlaysResultsTrain(10, x), 0),
+        fitness_fn=lambda x: np.maximum(manyPlaysResultsTrain(5, x), 0),
         chromosome_length=37,
+        crossover_rate=0.9,
         mutation_rate=0.1,
-        mutation_strength=0.5,
-        elitism_rate=0.05
+        elitism_rate=0.2,
+        random_state=42
     )
 
-    best_state, best_value = ga.evolve(100, 12*60*60)
+    best_state, best_value = ga.evolve(1000, 12*60*60)
     res, value = manyPlaysResultsTest(30, best_state)
     npRes = np.asarray(res)
     print(res, npRes.mean(), npRes.std(), value)

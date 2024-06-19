@@ -7,14 +7,16 @@ class GeneticAlgorithm:
     def __init__(self, fitness_fn,
                  chromosome_length,
                  population_size=100,
-                 mutation_rate=0.05,
-                 mutation_strength=0.1,
-                 elitism_rate=0.05,
+                 crossover_rate=0.9,
+                 mutation_rate=0.1,
+                 mutation_strength=1,
+                 elitism_rate=0.2,
                  random_state=None):
 
         self._fitness = fitness_fn
         self.chromosome_length = chromosome_length
         self.population_size = population_size
+        self.crossover_rate = crossover_rate
         self.mutation_rate = mutation_rate
         self.mutation_strength = mutation_strength
         self.elitism_size = int(np.ceil(elitism_rate * population_size))
@@ -25,7 +27,7 @@ class GeneticAlgorithm:
         best_individuals = self._select_k_best(population, fitness_values)
 
         start_time = time.time()
-        with tqdm(total=generations, desc='[Best Fitness -inf]', ncols=100) as pbar:
+        with tqdm(total=generations, desc='[ Training ][ Best Fitness: -inf, Current Fitness: -inf ]') as pbar:
             for _ in range(generations):
                 population, fitness_values = self._next_generation(population, fitness_values)
                 curr_fitness = fitness_values[0]
@@ -33,8 +35,8 @@ class GeneticAlgorithm:
                 best_individuals, population, fitness_values = self._elitism(best_individuals, population, fitness_values)
 
                 pbar.set_description(
-                    f'[Best Fitness: {best_individuals[0][1]:.2f}'
-                    f', Current Fitness: {curr_fitness:.2f}]'
+                    f'[ Training ][ Best Fitness: {best_individuals[0][1]:.2f}'
+                    f', Current Fitness: {curr_fitness:.2f} ]'
                 )
                 pbar.update(1)
 
@@ -61,21 +63,27 @@ class GeneticAlgorithm:
         return parent1, parent2
 
     def _crossover(self, parent1, parent2):
-        mask = np.random.rand(self.chromosome_length) < 0.5
+        mask = self.random.rand(self.chromosome_length) < 0.5
         child = np.where(mask, parent1, parent2)
         return child
 
     def _mutate(self, individual):
-        mask = np.random.rand(self.chromosome_length) < self.mutation_rate
-        individual[mask] += np.random.randn(np.sum(mask)) * self.mutation_strength
+        mask = self.random.rand(self.chromosome_length) < 0.5
+        individual[mask] += self.random.randn(np.sum(mask)) * self.mutation_strength
         return individual
 
     def _next_generation(self, population, fitness_values):
         new_population = []
         for _ in range(self.population_size):
             parent1, parent2 = self._parent_selection(population, fitness_values)
-            child = self._crossover(parent1, parent2)
-            child = self._mutate(child)
+            child = [parent1, parent2][self.random.randint(2)]
+
+            if self.random.rand() < self.crossover_rate:
+                child = self._crossover(parent1, parent2)
+
+            if self.random.rand() < self.mutation_rate:
+                child = self._mutate(child)
+
             new_population.append(child)
         new_population = np.asarray(new_population)
 
@@ -87,7 +95,7 @@ class GeneticAlgorithm:
         return list(it.islice(zip(population, fitness_values), self.elitism_size))
 
     def _elitism(self, best_individuals, population, fitness_values):
-        best_population, best_fitness_values = (np.asarray(item) for item in zip(*best_individuals))
+        best_population, best_fitness_values = zip(*best_individuals)
         new_population = np.concatenate((best_population, population))
         new_fitness_values = np.concatenate((best_fitness_values, fitness_values))
 
@@ -96,7 +104,7 @@ class GeneticAlgorithm:
         new_fitness_values = new_fitness_values[indices]
 
         best_individuals = self._select_k_best(new_population, new_fitness_values)
-        population = new_population[:len(population)]
-        fitness_values = new_fitness_values[:len(fitness_values)]
+        population = new_population[:self.population_size]
+        fitness_values = new_fitness_values[:self.population_size]
 
         return best_individuals, population, fitness_values

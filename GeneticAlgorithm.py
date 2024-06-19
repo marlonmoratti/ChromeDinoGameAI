@@ -1,5 +1,6 @@
 import numpy as np
 import time
+from tqdm import tqdm
 
 class GeneticAlgorithm:
     def __init__(self, fitness_fn,
@@ -22,15 +23,17 @@ class GeneticAlgorithm:
         best_individual = max(zip(population, fitness_values), key=lambda x: x[1])
 
         start_time = time.time()
-        for generation in range(generations):
-            population, fitness_values, current_best = self._next_generation(population, fitness_values)
-            best_individual = max([best_individual, current_best], key=lambda x: x[1])
+        with tqdm(total=generations, desc='[Best Fitness -inf]', ncols=100) as pbar:
+            for _ in range(generations):
+                population, fitness_values, current_best = self._next_generation(population, fitness_values)
+                best_individual = max([best_individual, current_best], key=lambda x: x[1])
 
-            print(f'Generation {generation + 1}/{generations}: Fitness = {best_individual[1]}')
+                pbar.set_description(f'[Best Fitness: {best_individual[1]:.2f}, Current Fitness: {current_best[1]:.2f}]')
+                pbar.update(1)
 
-            curr_time = time.time()
-            elapsed_time = curr_time - start_time
-            if elapsed_time > timelimit: break
+                curr_time = time.time()
+                elapsed_time = curr_time - start_time
+                if elapsed_time > timelimit: break
         
         return best_individual
 

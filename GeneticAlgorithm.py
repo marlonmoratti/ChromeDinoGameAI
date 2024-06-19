@@ -1,3 +1,4 @@
+import itertools as it
 import numpy as np
 import time
 from tqdm import tqdm
@@ -16,24 +17,24 @@ class GeneticAlgorithm:
         self.population_size = population_size
         self.mutation_rate = mutation_rate
         self.mutation_strength = mutation_strength
-        self.elitism_rate = elitism_rate
+        self.elitism_size = int(np.ceil(elitism_rate * population_size))
         self.random = np.random.RandomState(random_state)
 
     def evolve(self, generations, timelimit):
-        population = self._initialize_population()
-        fitness_values = self._fitness(population)
-        best_individuals = self._select_k_best(population, fitness_values,
-            k=int(self.elitism_rate*self.population_size))
+        population, fitness_values = self._initialize_population()
+        best_individuals = self._select_k_best(population, fitness_values)
 
         start_time = time.time()
         with tqdm(total=generations, desc='[Best Fitness -inf]', ncols=100) as pbar:
             for _ in range(generations):
-                population, fitness_values, current_best = self._next_generation(population, fitness_values)
+                population, fitness_values = self._next_generation(population, fitness_values)
+                curr_fitness = fitness_values[0]
+
                 best_individuals, population, fitness_values = self._elitism(best_individuals, population, fitness_values)
 
                 pbar.set_description(
                     f'[Best Fitness: {best_individuals[0][1]:.2f}'
-                    f', Current Fitness: {current_best[1]:.2f}]'
+                    f', Current Fitness: {curr_fitness:.2f}]'
                 )
                 pbar.update(1)
 
@@ -44,14 +45,17 @@ class GeneticAlgorithm:
         return best_individuals[0]
 
     def _initialize_population(self):
-        return [self.random.randn(self.chromosome_length) for _ in range(self.population_size)]
+        population = self.random.randn(self.population_size, self.chromosome_length)
+        fitness_values = self._fitness(population)
+        indices = np.argsort(-fitness_values)
+
+        return population[indices], fitness_values[indices]
 
     def _parent_selection(self, population, fitness_values):
         total_fitness = sum(fitness_values)
         selection_probs = fitness_values / total_fitness
 
-        indices = np.arange(self.population_size)
-        parent_indices = self.random.choice(indices, size=2, p=selection_probs)
+        parent_indices = self.random.choice(self.population_size, size=2, p=selection_probs)
         parent1, parent2 = population[parent_indices[0]], population[parent_indices[1]]
 
         return parent1, parent2
@@ -73,19 +77,26 @@ class GeneticAlgorithm:
             child = self._crossover(parent1, parent2)
             child = self._mutate(child)
             new_population.append(child)
+        new_population = np.asarray(new_population)
 
         fitness_values = self._fitness(new_population)
-        current_best = max(zip(new_population, fitness_values), key=lambda x: x[1])
-        return new_population, fitness_values, current_best
+        indices = np.argsort(-fitness_values)
+        return new_population[indices], fitness_values[indices]
 
-    def _select_k_best(self, population, fitness_values, k):
-        return sorted(zip(population, fitness_values), key=lambda x: x[1], reverse=True)[:k]
+    def _select_k_best(self, population, fitness_values):
+        return list(it.islice(zip(population, fitness_values), self.elitism_size))
 
     def _elitism(self, best_individuals, population, fitness_values):
-        new_population = list(zip(population, fitness_values)) + best_individuals
-        new_population.sort(reverse=True, key=lambda x: x[1])
-        k = int(self.elitism_rate*self.population_size)
+        best_population, best_fitness_values = (np.asarray(item) for item in zip(*best_individuals))
+        new_population = np.concatenate((best_population, population))
+        new_fitness_values = np.concatenate((best_fitness_values, fitness_values))
 
-        best_individuals = new_population[:k]
-        population, fitness_values = list(zip(*new_population[:-k]))
+        indices = np.argsort(-new_fitness_values, kind='mergesort')
+        new_population = new_population[indices]
+        new_fitness_values = new_fitness_values[indices]
+
+        best_individuals = self._select_k_best(new_population, new_fitness_values)
+        population = new_population[:len(population)]
+        fitness_values = new_fitness_values[:len(fitness_values)]
+
         return best_individuals, population, fitness_values

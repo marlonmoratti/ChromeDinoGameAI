@@ -6,6 +6,7 @@ from tqdm import tqdm
 class GeneticAlgorithm:
     def __init__(self, fitness_fn,
                  chromosome_length,
+                 cut_length,
                  population_size=100,
                  selection_type='tournament',
                  tournament_percent=0.05,
@@ -17,6 +18,7 @@ class GeneticAlgorithm:
 
         self._fitness = fitness_fn
         self.chromosome_length = chromosome_length
+        self.cut_length = cut_length
         self.population_size = population_size
         self.selection_type = selection_type
         self.tournament_size = int(np.ceil(tournament_percent * population_size))
@@ -46,7 +48,9 @@ class GeneticAlgorithm:
 
                 curr_time = time.time()
                 elapsed_time = curr_time - start_time
-                if elapsed_time > timelimit: break
+                if elapsed_time > timelimit:
+                    print('[ TLE ] The training has been interrupted.')
+                    break
         
         return best_individuals[0]
 
@@ -91,14 +95,20 @@ class GeneticAlgorithm:
         return parent1, parent2
 
     def _crossover(self, parent1, parent2):
-        mask = self.random.rand(self.chromosome_length) < 0.5
+        mask = self._get_cut_mask()
         child = np.where(mask, parent1, parent2)
         return child
 
     def _mutate(self, individual):
-        mask = self.random.rand(self.chromosome_length) < 0.5
+        mask = self._get_cut_mask()
         individual[mask] += self.random.randn(np.sum(mask)) * self.mutation_strength
         return individual
+    
+    def _get_cut_mask(self):
+        num_batches = int(np.ceil(self.chromosome_length / self.cut_length))
+        batch_values = self.random.choice([True, False], size=num_batches)
+        mask = np.repeat(batch_values, self.cut_length)
+        return mask[:self.chromosome_length]
 
     def _next_generation(self, population, fitness_values):
         new_population = []
@@ -119,9 +129,6 @@ class GeneticAlgorithm:
         indices = np.argsort(-fitness_values)
         return new_population[indices], fitness_values[indices]
 
-    def _select_k_best(self, population, fitness_values):
-        return list(it.islice(zip(population, fitness_values), self.elitism_size))
-
     def _elitism(self, best_individuals, population, fitness_values):
         best_population, best_fitness_values = zip(*best_individuals)
         new_population = np.concatenate((best_population, population))
@@ -136,3 +143,6 @@ class GeneticAlgorithm:
         fitness_values = new_fitness_values[:self.population_size]
 
         return best_individuals, population, fitness_values
+    
+    def _select_k_best(self, population, fitness_values):
+        return list(it.islice(zip(population, fitness_values), self.elitism_size))

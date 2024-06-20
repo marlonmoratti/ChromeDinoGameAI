@@ -393,11 +393,9 @@ from GeneticAlgorithm import GeneticAlgorithm
 def main():
 
     ga = GeneticAlgorithm(
-        fitness_fn=lambda x: np.maximum(manyPlaysResultsTrain(5, x), 0),
+        fitness_fn=lambda x: np.maximum(manyPlaysResultsTrain(3, x), 0),
         chromosome_length=37,
-        crossover_rate=0.9,
-        mutation_rate=0.1,
-        elitism_percent=0.2,
+        cut_length=8,
         random_state=42
     )
 

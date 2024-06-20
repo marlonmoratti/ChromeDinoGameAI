@@ -37,7 +37,7 @@ class NeuralNet:
         assert len(state) == ((input_layer_size  * self.hidden_layer_size) + self.hidden_layer_size + 1)
 
         n_input_weights = input_layer_size * self.hidden_layer_size
-        input_layer_weights = state[:n_input_weights].reshape(input_layer_size, self.hidden_layer_size)
+        input_layer_weights = state[:n_input_weights].reshape(self.hidden_layer_size, input_layer_size).T
         hidden_layer_weights = state[n_input_weights:]
         return input_layer_weights, hidden_layer_weights
 

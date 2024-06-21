@@ -396,6 +396,7 @@ def main():
         fitness_fn=lambda x: np.maximum(manyPlaysResultsTrain(3, x), 0),
         chromosome_length=37,
         cut_length=8,
+        init_individual_fn=lambda x: NeuralNet.init_state(4, x),
         random_state=42
     )
 

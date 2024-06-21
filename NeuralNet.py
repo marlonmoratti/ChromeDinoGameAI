@@ -2,6 +2,7 @@ import numpy as np
 from scipy.special import expit
 
 INPUT_LAYER_SIZE = 7
+OUTPUT_LAYER_SIZE = 1
 THRESHOLD = 0.55
 
 def parse_object_type(object_type):
@@ -20,6 +21,23 @@ class NeuralNet:
         fc1, fc2 = self._parse_state(state)
         self.fc1 = lambda x: np.dot(np.concatenate(([1], x)), fc1)
         self.fc2 = lambda x: np.dot(np.concatenate(([1], x)), fc2)
+
+    @staticmethod
+    def init_state(hidden_layer_size, random_state=None):
+        random = np.random.RandomState(random_state)
+        
+        # He initialization
+        fc1 = (random.randn(INPUT_LAYER_SIZE, hidden_layer_size)
+            * np.sqrt(2.0 / INPUT_LAYER_SIZE))
+        fc1 = np.concatenate((np.zeros((1, hidden_layer_size)), fc1), axis=0)
+
+        # Xavier initialization
+        fc2 = (random.randn(hidden_layer_size, OUTPUT_LAYER_SIZE)
+            * np.sqrt(2.0 / (hidden_layer_size + OUTPUT_LAYER_SIZE)))
+        fc2 = np.concatenate((np.zeros((1, OUTPUT_LAYER_SIZE)), fc2), axis=0)
+
+        state = np.concatenate((fc1.T.flatten(), fc2.T.flatten()))
+        return state
 
     def forward(self, x):
         x = self._relu(self.fc1(x))

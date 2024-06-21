@@ -14,6 +14,7 @@ class GeneticAlgorithm:
                  mutation_rate=0.1,
                  mutation_strength=1,
                  elitism_percent=0.2,
+                 init_individual_fn=None,
                  random_state=None):
 
         self._fitness = fitness_fn
@@ -26,6 +27,7 @@ class GeneticAlgorithm:
         self.mutation_rate = mutation_rate
         self.mutation_strength = mutation_strength
         self.elitism_size = int(np.ceil(elitism_percent * population_size))
+        self._init_individual = init_individual_fn
         self.random = np.random.RandomState(random_state)
 
     def evolve(self, generations, timelimit):
@@ -55,10 +57,18 @@ class GeneticAlgorithm:
         return best_individuals[0]
 
     def _initialize_population(self):
-        population = self.random.randn(self.population_size, self.chromosome_length)
+        population = None
+
+        if self._init_individual:
+            population = np.asarray([
+                self._init_individual(self.random.randint(self.population_size*1000))
+                for _ in range(self.population_size)
+            ])
+        else:
+            population = self.random.randn(self.population_size, self.chromosome_length)
+
         fitness_values = self._fitness(population)
         indices = np.argsort(-fitness_values)
-
         return population[indices], fitness_values[indices]
 
     def _parent_selection(self, population, fitness_values):

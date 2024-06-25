@@ -13,7 +13,7 @@ def parse_object_type(object_type):
     }
 
     object_type_name = type(object_type).__name__
-    return object_types.get(object_type_name, -1)
+    return object_types.get(object_type_name, object_type)
 
 class NeuralNet:
     def __init__(self, state, hidden_layer_size=4):

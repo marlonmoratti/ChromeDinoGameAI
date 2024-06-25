@@ -35,7 +35,7 @@ class GeneticAlgorithm:
         best_individuals = self._select_k_best(population, fitness_values)
 
         start_time = time.time()
-        with tqdm(total=generations, desc='[ Training ][ Best Fitness: -inf, Current Fitness: -inf ]') as pbar:
+        with tqdm(total=generations) as pbar:
             for _ in range(generations):
                 population, fitness_values = self._next_generation(population, fitness_values)
                 curr_fitness = fitness_values[0]
@@ -121,20 +121,24 @@ class GeneticAlgorithm:
         return mask[:self.chromosome_length]
 
     def _next_generation(self, population, fitness_values):
-        new_population = []
+        new_population = set()
+
         for _ in range(self.population_size):
             parent1, parent2 = self._parent_selection(population, fitness_values)
-            child = [parent1, parent2][self.random.randint(2)]
 
-            if self.random.rand() < self.crossover_rate:
-                child = self._crossover(parent1, parent2)
+            while True:
+                child = [parent1, parent2][self.random.randint(2)]
 
-            if self.random.rand() < self.mutation_rate:
-                child = self._mutate(child)
+                if self.random.rand() < self.crossover_rate:
+                    child = self._crossover(parent1, parent2)
 
-            new_population.append(child)
-        new_population = np.asarray(new_population)
+                if self.random.rand() < self.mutation_rate:
+                    child = self._mutate(child)
+                
+                if tuple(child) not in new_population: break
+            new_population.add(tuple(child))
 
+        new_population = np.asarray(list(new_population))
         fitness_values = self._fitness(new_population)
         indices = np.argsort(-fitness_values)
         return new_population[indices], fitness_values[indices]

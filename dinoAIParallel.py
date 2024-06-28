@@ -396,15 +396,12 @@ def main():
         fitness_fn=lambda x: np.maximum(manyPlaysResultsTrain(3, x), 0),
         chromosome_length=37,
         cut_length=8,
-        init_individual_fn=lambda x: NeuralNet.init_state(4, x),
         random_state=42
     )
 
-    best_state, best_value = ga.evolve(1000, 12*60*60)
+    best_state, best_value = ga.evolve(100, 12*60*60)
     res, value = manyPlaysResultsTest(30, best_state)
     npRes = np.asarray(res)
     print(res, npRes.mean(), npRes.std(), value)
-
-    np.save('weights.npy', best_state)
 
 main()

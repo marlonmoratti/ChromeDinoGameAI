@@ -8,12 +8,13 @@ class GeneticAlgorithm:
                  chromosome_length,
                  cut_length,
                  population_size=100,
-                 selection_type='tournament',
-                 tournament_percent=0.05,
+                 selection_type='roulette',
+                 tournament_size=5,
+                 n_parents=10,
                  crossover_rate=0.9,
                  mutation_rate=0.1,
                  mutation_strength=1,
-                 elitism_percent=0.2,
+                 elitism_size=1,
                  init_individual_fn=None,
                  random_state=None):
 
@@ -22,11 +23,12 @@ class GeneticAlgorithm:
         self.cut_length = cut_length
         self.population_size = population_size
         self.selection_type = selection_type
-        self.tournament_size = int(np.ceil(tournament_percent * population_size))
+        self.tournament_size = tournament_size
+        self.n_parents = n_parents
         self.crossover_rate = crossover_rate
         self.mutation_rate = mutation_rate
         self.mutation_strength = mutation_strength
-        self.elitism_size = int(np.ceil(elitism_percent * population_size))
+        self.elitism_size = max(1, elitism_size)
         self._init_individual = init_individual_fn
         self.random = np.random.RandomState(random_state)
 
@@ -46,7 +48,7 @@ class GeneticAlgorithm:
                     f'[ Training ][ Best Fitness: {best_individuals[0][1]:.2f}'
                     f', Current Fitness: {curr_fitness:.2f} ]'
                 )
-                pbar.update(1)
+                pbar.update()
 
                 curr_time = time.time()
                 elapsed_time = curr_time - start_time
@@ -74,7 +76,8 @@ class GeneticAlgorithm:
     def _parent_selection(self, population, fitness_values):
         selection = {
             'roulette': self._roulette_wheel_selection,
-            'tournament': self._tournament_selection
+            'tournament': self._tournament_selection,
+            'k_best_selection': self._k_best_selection
         }
 
         return selection[self.selection_type](population, fitness_values)
@@ -102,6 +105,12 @@ class GeneticAlgorithm:
             parent2_idx = min(tournament_indices)
 
         parent1, parent2 = population[parent1_idx], population[parent2_idx]
+        return parent1, parent2
+    
+    def _k_best_selection(self, population, fitness_values):
+        parent_indices = self.random.choice(self.n_parents, size=2, replace=False)
+        parent1, parent2 = population[parent_indices[0]], population[parent_indices[1]]
+
         return parent1, parent2
 
     def _crossover(self, parent1, parent2):

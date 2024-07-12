@@ -1,7 +1,7 @@
 import numpy as np
 from scipy.special import expit
 
-INPUT_LAYER_SIZE = 7
+INPUT_LAYER_SIZE = 4
 OUTPUT_LAYER_SIZE = 1
 THRESHOLD = 0.55
 
@@ -13,7 +13,7 @@ def parse_object_type(object_type):
     }
 
     object_type_name = type(object_type).__name__
-    return object_types.get(object_type_name, object_type)
+    return object_types.get(object_type_name, -1)
 
 class NeuralNet:
     def __init__(self, state, hidden_layer_size=4):
@@ -24,7 +24,7 @@ class NeuralNet:
 
     @staticmethod
     def init_state(hidden_layer_size, random_state=None):
-        random = np.random.RandomState(random_state)
+        random = np.random.RandomState(random_state) if isinstance(random_state, int) else random_state
         
         # He initialization
         fc1 = (random.randn(INPUT_LAYER_SIZE, hidden_layer_size)
@@ -45,8 +45,7 @@ class NeuralNet:
         return x
 
     def keySelector(self, distance, obHeight, speed, obType, nextObDistance, nextObHeight, nextObType):
-        x = np.array([speed, distance, obHeight, parse_object_type(obType),
-            nextObDistance, nextObHeight, parse_object_type(nextObType)])
+        x = np.array([speed, distance, obHeight, parse_object_type(obType)])
         x = self.forward(x)
         return 'K_DOWN' if x < THRESHOLD else 'K_UP'
 

@@ -63,8 +63,7 @@ class GeneticAlgorithm:
 
         if self._init_individual:
             population = np.asarray([
-                self._init_individual(self.random.randint(self.population_size*1000))
-                for _ in range(self.population_size)
+                self._init_individual(self.random) for _ in range(self.population_size)
             ])
         else:
             population = self.random.randn(self.population_size, self.chromosome_length)
@@ -136,7 +135,7 @@ class GeneticAlgorithm:
             parent1, parent2 = self._parent_selection(population, fitness_values)
 
             while True:
-                child = [parent1, parent2][self.random.randint(2)]
+                child = [parent1, parent2][self.random.randint(2)].copy()
 
                 if self.random.rand() < self.crossover_rate:
                     child = self._crossover(parent1, parent2)

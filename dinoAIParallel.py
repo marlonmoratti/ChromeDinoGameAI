@@ -1,6 +1,6 @@
 import pygame
 import os
-import random
+import random; random.seed(42)
 import time
 from sys import exit
 
@@ -393,15 +393,19 @@ from GeneticAlgorithm import GeneticAlgorithm
 def main():
 
     ga = GeneticAlgorithm(
-        fitness_fn=lambda x: np.maximum(manyPlaysResultsTrain(3, x), 0),
-        chromosome_length=37,
-        cut_length=8,
+        fitness_fn=lambda x: np.maximum(manyPlaysResultsTrain(10, x), 0),
+        chromosome_length=25,
+        cut_length=5,
+        init_individual_fn=lambda x: NeuralNet.init_state(4, x),
         random_state=42
     )
 
-    best_state, best_value = ga.evolve(100, 12*60*60)
+    (best_state, best_value), history = ga.evolve(1000, 12*60*60)
     res, value = manyPlaysResultsTest(30, best_state)
     npRes = np.asarray(res)
     print(res, npRes.mean(), npRes.std(), value)
+
+    np.save('results/best_state.npy', best_state)
+    np.save('results/history.npy', history, allow_pickle=True)
 
 main()

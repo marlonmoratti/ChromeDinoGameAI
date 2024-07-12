@@ -1,6 +1,7 @@
 import itertools as it
 import numpy as np
 import time
+from collections import defaultdict
 from tqdm import tqdm
 
 class GeneticAlgorithm:
@@ -36,27 +37,30 @@ class GeneticAlgorithm:
         population, fitness_values = self._initialize_population()
         best_individuals = self._select_k_best(population, fitness_values)
 
+        history = defaultdict(list)
+
         start_time = time.time()
-        with tqdm(total=generations) as pbar:
-            for _ in range(generations):
+        with tqdm(range(generations)) as tqdm_pbar:
+            for generation in tqdm_pbar:
                 population, fitness_values = self._next_generation(population, fitness_values)
-                curr_fitness = fitness_values[0]
+
+                history['generation'].append(generation)
+                history['fitness'].append(fitness_values[0])
 
                 best_individuals, population, fitness_values = self._elitism(best_individuals, population, fitness_values)
 
-                pbar.set_description(
+                tqdm_pbar.set_description(
                     f'[ Training ][ Best Fitness: {best_individuals[0][1]:.2f}'
-                    f', Current Fitness: {curr_fitness:.2f} ]'
+                    f', Current Fitness: {history['fitness'][-1]:.2f} ]'
                 )
-                pbar.update()
 
                 curr_time = time.time()
                 elapsed_time = curr_time - start_time
                 if elapsed_time > timelimit:
                     print('[ TLE ] The training has been interrupted.')
                     break
-        
-        return best_individuals[0]
+
+        return best_individuals[0], history
 
     def _initialize_population(self):
         population = None

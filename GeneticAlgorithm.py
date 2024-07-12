@@ -51,7 +51,7 @@ class GeneticAlgorithm:
 
                 tqdm_pbar.set_description(
                     f'[ Training ][ Best Fitness: {best_individuals[0][1]:.2f}'
-                    f', Current Fitness: {history['fitness'][-1]:.2f} ]'
+                    f', Current Fitness: {history["fitness"][-1]:.2f} ]'
                 )
 
                 curr_time = time.time()

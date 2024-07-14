@@ -387,15 +387,28 @@ def manyPlaysResultsTest(rounds,best_solution):
     return (results, npResults.mean() - npResults.std())
 
 
+from utils import parse_arguments
 from GeneticAlgorithm import GeneticAlgorithm
 
 
 def main():
+    config = parse_arguments()
+
+    if config['load_state']:
+        best_state = np.load('results/best_state.npy')
+
+        res, value = manyPlaysResultsTest(30, best_state)
+        npRes = np.asarray(res)
+        print(res, npRes.mean(), npRes.std(), value)
+        return
 
     ga = GeneticAlgorithm(
         fitness_fn=lambda x: np.maximum(manyPlaysResultsTrain(10, x), 0),
         chromosome_length=25,
         cut_length=5,
+        selection_type='tournament',
+        crossover_rate=0.75,
+        mutation_rate=0.25,
         init_individual_fn=lambda x: NeuralNet.init_state(4, x),
         random_state=42
     )
@@ -406,6 +419,6 @@ def main():
     print(res, npRes.mean(), npRes.std(), value)
 
     np.save('results/best_state.npy', best_state)
-    np.save('results/history.npy', history, allow_pickle=True)
+    np.save('results/history.npy', history)
 
 main()

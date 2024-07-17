@@ -1,16 +1,16 @@
 import argparse
 
 def parse_arguments():
-    parser = argparse.ArgumentParser(description='DinoAI')
+    parser = argparse.ArgumentParser(description='perform the training of the network')
     parser.add_argument(
         '--load-state',
-        help='Loads and evaluates the best state of the algorithm',
+        help='loads and evaluates the best state of the network',
         action=argparse.BooleanOptionalAction,
         default=False
     )
     parser.add_argument(
         '--render-game',
-        help='Enable game rendering',
+        help='enable game rendering',
         action=argparse.BooleanOptionalAction,
         default=False
     )

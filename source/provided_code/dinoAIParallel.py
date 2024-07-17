@@ -229,7 +229,7 @@ def playerKeySelector():
         return "K_NO"
 
 
-from .NeuralNet import NeuralNet
+from ..NeuralNet import NeuralNet
 
 
 def playGame(solutions):

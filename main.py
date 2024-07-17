@@ -1,20 +1,21 @@
-from src.dinoAIParallel import manyPlaysResultsTrain, manyPlaysResultsTest
-from src.GeneticAlgorithm import GeneticAlgorithm
-from src.NeuralNet import NeuralNet
-from src.utils import parse_arguments
+from source.provided_code.dinoAIParallel import manyPlaysResultsTrain, manyPlaysResultsTest
+from source.GeneticAlgorithm import GeneticAlgorithm
+from source.NeuralNet import NeuralNet
+from source.utils import parse_arguments
 import numpy as np
 
 def main():
     config = parse_arguments()
 
     if config['load_state']:
+        print('Loading and evaluating the best state of the algorithm...')
         best_state = np.load('results/best_state.npy')
 
         res, value = manyPlaysResultsTest(30, best_state)
-        npRes = np.asarray(res)
-        print(res, npRes.mean(), npRes.std(), value)
+        print(f'\n{{ mean: {np.mean(res):.2f}, std: {np.std(res):.2f}, score: {value:.2f} }}')
         return
-
+    
+    print('Starting a new training session...')
     ga = GeneticAlgorithm(
         fitness_fn=lambda x: np.maximum(manyPlaysResultsTrain(10, x), 0),
         chromosome_length=25,
@@ -28,8 +29,7 @@ def main():
 
     (best_state, best_value), history = ga.evolve(1000, 12*60*60)
     res, value = manyPlaysResultsTest(30, best_state)
-    npRes = np.asarray(res)
-    print(res, npRes.mean(), npRes.std(), value)
+    print(f'\n{{ mean: {np.mean(res):.2f}, std: {np.std(res):.2f}, score: {value:.2f} }}')
 
     np.save('results/best_state.npy', best_state)
     np.save('results/history.npy', history)

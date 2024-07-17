@@ -38,6 +38,6 @@ def main(config):
 
 if __name__ == '__main__':
     config = parse_arguments()
-    os.environ['RENDER_GAME'] = str(config['load_state'] and config['render_game'])
+    os.environ['RENDER_GAME'] = str(config['render_game'])
     from source.provided_code.dinoAIParallel import manyPlaysResultsTrain, manyPlaysResultsTest
     main(config)

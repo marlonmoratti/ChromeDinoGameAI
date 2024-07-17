@@ -1,9 +1,22 @@
 # Dino Game AI with Genetic Algorithm
 
-## Description
+- [Description](#description)
+- [Usage Instructions](#usage-instructions)
+  - [Installation](#installation)
+  - [Execution](#execution)
+- [Contact](#contact)
+
+<div id="description"></div>
+
+## 📝 Description
 This project implements a neural network trained using a genetic algorithm from scratch to play Google's Dino Game. The network learns to make decisions (jump or duck) based on the obstacles appearing in the game. Training of the neural network is conducted using a genetic algorithm, where the network weights are optimized to maximize performance in the game over time.
 
-## Usage Instructions
+<div id="usage-instructions"></div>
+
+## 💻 Usage Instructions
+
+<div id="installation"></div>
+
 ### Installation
 Firstly, clone this repository:
 ```sh
@@ -18,13 +31,15 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
+<div id="execution"></div>
+
 ### Execution
-Finally, simply run the command below to train the network:
+Finally, run the command below to train the network:
 ```sh
 python3 main.py
 ```
 
-At the end of training, the network weights will be saved in the file [best_state.npy](results/best_state.npy), and tests can be conducted using the command below:
+At the end of the training, the network weights will be saved in the file [best_state.npy](results/best_state.npy), and tests can be conducted using the command below:
 ```sh
 python3 main.py --load-state
 ```
@@ -33,3 +48,14 @@ If you want to perform a single test run with game rendering enabled, use the co
 ```sh
 python3 main.py --load-state --render-game
 ```
+
+For more information, run the command below:
+```sh
+python3 main.py --help
+```
+
+<div id="contact"></div>
+
+## ✉️ Contact
+
+If you have any questions or suggestions, feel free to open an issue or contact me directly.

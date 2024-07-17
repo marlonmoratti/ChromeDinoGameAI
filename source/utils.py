@@ -8,6 +8,12 @@ def parse_arguments():
         action=argparse.BooleanOptionalAction,
         default=False
     )
+    parser.add_argument(
+        '--render-game',
+        help='Enable game rendering',
+        action=argparse.BooleanOptionalAction,
+        default=False
+    )
 
     args = parser.parse_args()
     return vars(args)

@@ -8,7 +8,7 @@ pygame.init()
 
 # Valid values: HUMAN_MODE or AI_MODE
 GAME_MODE = "AI_MODE"
-RENDER_GAME = False
+RENDER_GAME = eval(os.environ['RENDER_GAME'])
 
 # Global Constants
 SCREEN_HEIGHT = 600

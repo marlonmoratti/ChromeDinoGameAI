@@ -1,15 +1,17 @@
-from source.provided_code.dinoAIParallel import manyPlaysResultsTrain, manyPlaysResultsTest
 from source.GeneticAlgorithm import GeneticAlgorithm
 from source.NeuralNet import NeuralNet
 from source.utils import parse_arguments
 import numpy as np
+import os
 
-def main():
-    config = parse_arguments()
-
+def main(config):
     if config['load_state']:
         print('Loading and evaluating the best state of the algorithm...')
         best_state = np.load('results/best_state.npy')
+
+        if config['render_game']:
+            manyPlaysResultsTest(1, best_state)
+            return
 
         res, value = manyPlaysResultsTest(30, best_state)
         print(f'\n{{ mean: {np.mean(res):.2f}, std: {np.std(res):.2f}, score: {value:.2f} }}')
@@ -35,4 +37,7 @@ def main():
     np.save('results/history.npy', history)
 
 if __name__ == '__main__':
-    main()
+    config = parse_arguments()
+    os.environ['RENDER_GAME'] = str(config['load_state'] and config['render_game'])
+    from source.provided_code.dinoAIParallel import manyPlaysResultsTrain, manyPlaysResultsTest
+    main(config)

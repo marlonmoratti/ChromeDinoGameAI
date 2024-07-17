@@ -1,5 +1,10 @@
 # Dino Game AI with Genetic Algorithm
 
+<div align="center">
+  <img src="images/dino.gif" alt="Dino running and dodging obstacles", height="200">
+</div>
+
+## Summary
 - [Description](#description)
 - [Usage Instructions](#usage-instructions)
   - [Installation](#installation)

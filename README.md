@@ -25,8 +25,8 @@ This project implements a neural network trained using a genetic algorithm from 
 ### Installation
 Firstly, clone this repository:
 ```sh
-git clone https://github.com/marlonmoratti/DinoGameAI.git
-cd DinoGameAI
+git clone https://github.com/marlonmoratti/ChromeDinoGameAI.git
+cd ChromeDinoGameAI
 ```
 
 To run the scripts, you need to install some packages. We recommend using a virtual environment of your choice. In this guide, we will use venv. Make sure you have Python 3.10 installed. If you choose venv, follow these commands:
